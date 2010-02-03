@@ -4,7 +4,7 @@ Parse a JIRA XML export and dump all bugs and attachments into a CouchDB databas
 
 ## Requirements
 
-Needs PHP 5.
+Needs PHP 5. Yes, PHP. Get over it.
 
 ## Usage
 
