@@ -21,3 +21,4 @@ Customise the top of gigan.php. Then run:
 
 Gigan is Godzilla's archenemy. Jira is the Japanese name for Godzilla. Fuck JIRA.
 
+“Gigan was the first monster to cause Godzilla to visibly bleed.” — http://en.wikipedia.org/wiki/Gigan
