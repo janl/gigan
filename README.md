@@ -15,5 +15,5 @@ Customise the top of gigan.php. Then run:
 
 ## Name
 
-Gigan is Godzilla's archenemy. Jira is the Japanese name for Godzilla.
+Gigan is Godzilla's archenemy. Jira is the Japanese name for Godzilla. Fuck JIRA.
 
