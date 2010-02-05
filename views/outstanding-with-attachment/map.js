@@ -4,6 +4,6 @@ function(doc) {
     && doc._attachments
     && doc.title
     && doc.jira_key) {
-      emit(doc.jira_key, doc.title);
+      emit(doc.jira_key, {title: doc.title, jira_key: doc.jira_key});
   }
 }

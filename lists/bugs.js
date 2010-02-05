@@ -8,8 +8,11 @@ function(head, req) {
 
     var bug;
     while(bug = getRow()) {
+      if(bug.id.substr(0, "_design".length) == "_design") {
+        continue;
+      }
       send(Mustache.to_html(templates.bugs.row, {
-        title: bug.value,
+        title: bug.value.title,
         id: bug.id
       }));
     }

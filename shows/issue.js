@@ -6,6 +6,7 @@ function(doc, req) {
     var html = "";
     html += templates.head;
     html += Mustache.to_html(templates.issue, {
+      id: doc._id,
       title: doc.title,
       created: doc.created,
       reporter: doc.reporter,
