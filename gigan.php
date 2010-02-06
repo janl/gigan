@@ -1,4 +1,5 @@
 <?php
+// Note: this code is ugly. it scrapes JIRA's XML, it must be ugly.
 
 // customise here
 
@@ -19,12 +20,20 @@ echo "debug: getting latest update\n";
 $latest_update_result = $couch->send("GET", "/$db/_design/gigan/_view/latest-update?descending=true&limit=1");
 $latest_update_result = json_decode($latest_update_result);
 $latest_update = $latest_update_result->rows[0]->key;
-
 echo "debug: latest update: $latest_update\n";
+
+echo "debug: getting latest comment update\n";
+$latest_update_result = $couch->send("GET", "/$db/_design/gigan/_view/latest-comment-update?descending=true&limit=1");
+$latest_update_result = json_decode($latest_update_result);
+$latest_update = $latest_update_result->rows[0]->key;
+echo "debug: latest comment update: $latest_update\n";
+
+
+$ids = array();
 
 // read the JIRA RSS feed until it finds a date that is < that timestamp
 echo "getting the rss feed ...";
-$rss = file_get_contents("http://issues.apache.org/jira/sr/jira.issueviews:searchrequest-rss/temp/SearchRequest.xml?pid=12310780&sorter/field=issuekey&sorter/order=DESC&tempMax=10");
+$rss = file_get_contents("http://issues.apache.org/jira/sr/jira.issueviews:searchrequest-rss/temp/SearchRequest.xml?pid=12310780&sorter/field=issuekey&sorter/order=DESC&tempMax=20");
 echo "done\n";
 
 $xml = simplexml_load_string($rss, $class_name = "SimpleXMLElement", LIBXML_ERR_NONE);
@@ -36,7 +45,27 @@ foreach($xml->channel->item AS $bug) {
   }
   $link = (string)$bug->link;
   $_split = explode("/", $link);
-  $id = $_split[count($_split)-1];
+  $ids[] = $_split[count($_split)-1];
+}
+
+echo "getting the comments rss feed ...";
+$rss = file_get_contents("http://issues.apache.org/jira/sr/jira.issueviews:searchrequest-comments-rss/temp/SearchRequest.xml?pid=12310780&sorter/field=issuekey&sorter/order=DESC&tempMax=20");
+echo "done\n";
+
+$xml = simplexml_load_string($rss, $class_name = "SimpleXMLElement", LIBXML_ERR_NONE);
+foreach($xml->channel->item AS $comment) {
+  $date = strtotime((string)$comment->pubDate) . "000";
+  echo "comparing $date with $latest_update\n";
+  if($date <= $latest_comment_update) {
+    break;
+  }
+  $link = (string)$comment->link;
+  if(preg_match("/(COUCHDB-\d\d)/", $link, $matches)) {
+    $ids[] = $matches[1];
+  }
+}
+
+foreach($ids AS $id) {
 
   echo "fetching $id...";
 
