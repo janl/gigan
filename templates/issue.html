@@ -1,5 +1,22 @@
-    <h2><a href="http://issues.apache.org/jira/browse/{{id}}">{{title}}</a></h2>
+    <h2><a href="http://issues.apache.org/jira/browse/{{_id}}">{{title}}</a></h2>
     <p>{{created}} by {{reporter}}</p>
-    <p>{{status}}</p>
+    <p>Status: {{status}}</p>
+
+    {{#has_attachments}}
+    <h3>Attachments</h2>
+    <p>
+      <ul>
+          {{{attachments}}}
+      </ul>
+    </p>
+    {{/has_attachments}}
+
+    <h3>Description</h3>
     <p>{{{description}}}</p>
-    
+
+    {{#has_comments}}
+    <h3>Comments</h3>
+    <p>
+      {{{show_comments}}}
+    </p>
+    {{/has_comments}}
