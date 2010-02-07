@@ -60,7 +60,7 @@ foreach($xml->channel->item AS $comment) {
     break;
   }
   $link = (string)$comment->link;
-  if(preg_match("/(COUCHDB-\d\d)/", $link, $matches)) {
+  if(preg_match("/(COUCHDB-\d+)/", $link, $matches)) {
     $ids[] = $matches[1];
   }
 }
