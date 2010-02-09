@@ -65,6 +65,8 @@ foreach($xml->channel->item AS $comment) {
   }
 }
 
+$ds = array_unique($ids);
+
 foreach($ids AS $id) {
 
   echo "fetching $id...";
