@@ -66,6 +66,10 @@ foreach($xml->channel->item AS $comment) {
 }
 
 $ids = array_unique($ids);
+if(count($ids) == 0) {
+  echo "nothing to fetch. Existing.\n"
+  exit(0);
+}
 
 foreach($ids AS $id) {
 
