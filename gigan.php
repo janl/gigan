@@ -12,64 +12,83 @@ $couchdb_port = 5984;
 $jira_attachment_url = "http://issues.apache.org/jira/secure/attachment/";
 
 // stop customising
-
-// ask gigan for the last updated bug's updated timestamp
 $couch = new CouchSimple(array("host" => $couchdb_host, "port" => $couchdb_port));
-
-echo "debug: getting latest update\n";
-$latest_update_result = $couch->send("GET", "/$db/_design/gigan/_view/latest-update?descending=true&limit=1");
-$latest_update_result = json_decode($latest_update_result);
-$latest_update = $latest_update_result->rows[0]->key;
-echo "debug: latest update: $latest_update\n";
-
-echo "debug: getting latest comment update\n";
-$latest_update_result = $couch->send("GET", "/$db/_design/gigan/_view/latest-comment-update?descending=true&limit=1");
-$latest_update_result = json_decode($latest_update_result);
-$latest_update = $latest_update_result->rows[0]->key;
-echo "debug: latest comment update: $latest_update\n";
-
 
 $ids = array();
 
-// read the JIRA RSS feed until it finds a date that is < that timestamp
-echo "getting the rss feed ...";
-$rss = file_get_contents("http://issues.apache.org/jira/sr/jira.issueviews:searchrequest-rss/temp/SearchRequest.xml?pid=12310780&sorter/field=issuekey&sorter/order=DESC&tempMax=20");
-echo "done\n";
+if(!isset($_ENV["GIGAN_BOOT"])) {
+  echo "Updating\n";
+  // ask gigan for the last updated bug's updated timestamp
 
-$xml = simplexml_load_string($rss, $class_name = "SimpleXMLElement", LIBXML_ERR_NONE);
-foreach($xml->channel->item AS $bug) {
-  $date = strtotime((string)$bug->pubDate) . "000";
-  echo "comparing $date with $latest_update\n";
-  if($date <= $latest_update) {
-    break;
+  echo "debug: getting latest update\n";
+  $latest_update_result = $couch->send("GET", "/$db/_design/gigan/_view/latest-update?descending=true&limit=1");
+  $latest_update_result = json_decode($latest_update_result);
+  $latest_update = $latest_update_result->rows[0]->key;
+  echo "debug: latest update: $latest_update\n";
+
+  echo "debug: getting latest comment update\n";
+  $latest_update_result = $couch->send("GET", "/$db/_design/gigan/_view/latest-comment-update?descending=true&limit=1");
+  $latest_update_result = json_decode($latest_update_result);
+  $latest_update = $latest_update_result->rows[0]->key;
+  echo "debug: latest comment update: $latest_update\n";
+
+
+  // read the JIRA RSS feed until it finds a date that is < that timestamp
+  echo "getting the rss feed ...";
+  $rss = file_get_contents("http://issues.apache.org/jira/sr/jira.issueviews:searchrequest-rss/temp/SearchRequest.xml?pid=12310780&sorter/field=issuekey&sorter/order=DESC&tempMax=50");
+  echo "done\n";
+
+  $xml = simplexml_load_string($rss, $class_name = "SimpleXMLElement", LIBXML_ERR_NONE);
+  foreach($xml->channel->item AS $bug) {
+    $date = strtotime((string)$bug->pubDate) . "000";
+    echo "comparing $date with $latest_update\n";
+    if($date <= $latest_update) {
+      break;
+    }
+    $link = (string)$bug->link;
+    $_split = explode("/", $link);
+    $ids[] = $_split[count($_split)-1];
   }
-  $link = (string)$bug->link;
-  $_split = explode("/", $link);
-  $ids[] = $_split[count($_split)-1];
+
+  echo "getting the comments rss feed ...";
+  $rss = file_get_contents("http://issues.apache.org/jira/sr/jira.issueviews:searchrequest-comments-rss/temp/SearchRequest.xml?pid=12310780&sorter/field=issuekey&sorter/order=DESC&tempMax=50");
+  echo "done\n";
+
+  $xml = simplexml_load_string($rss, $class_name = "SimpleXMLElement", LIBXML_ERR_NONE);
+  foreach($xml->channel->item AS $comment) {
+    $date = strtotime((string)$comment->pubDate) . "000";
+    echo "comparing $date with $latest_update\n";
+    if($date <= $latest_comment_update) {
+      break;
+    }
+    $link = (string)$comment->link;
+    if(preg_match("/(COUCHDB-\d+)/", $link, $matches)) {
+      $ids[] = $matches[1];
+    }
+  }
+
+  $ids = array_unique($ids);
+  if(count($ids) == 0) {
+    echo "nothing to fetch. Existing.\n";
+    exit(0);
+  }
+} else {
+  // bootstrap
+  echo "Bootstrapping\n";
+  $all_bugs = strip_tags(file_get_contents("http://issues.apache.org/jira/secure/IssueNavigator.jspa?reset=true&mode=hide&pid=12310780"));
+  if(preg_match("/Displaying issues 1 to 50 of ([0-9]+) matching issues/", $all_bugs, $matches)) {
+    $max_id = $matches[1];
+    $idnrs = range(1, $max_id);
+    foreach($idnrs AS $idnr) {
+      $ids[] = "COUCHDB-$idnr";
+    }
+    echo "Getting all ids from 1 to $max_id\n";
+  } else {
+    echo"Couldn't find MAX_BUG_ID\n";
+    exit(2);
+  }
 }
 
-echo "getting the comments rss feed ...";
-$rss = file_get_contents("http://issues.apache.org/jira/sr/jira.issueviews:searchrequest-comments-rss/temp/SearchRequest.xml?pid=12310780&sorter/field=issuekey&sorter/order=DESC&tempMax=20");
-echo "done\n";
-
-$xml = simplexml_load_string($rss, $class_name = "SimpleXMLElement", LIBXML_ERR_NONE);
-foreach($xml->channel->item AS $comment) {
-  $date = strtotime((string)$comment->pubDate) . "000";
-  echo "comparing $date with $latest_update\n";
-  if($date <= $latest_comment_update) {
-    break;
-  }
-  $link = (string)$comment->link;
-  if(preg_match("/(COUCHDB-\d+)/", $link, $matches)) {
-    $ids[] = $matches[1];
-  }
-}
-
-$ids = array_unique($ids);
-if(count($ids) == 0) {
-  echo "nothing to fetch. Existing.\n"
-  exit(0);
-}
 
 foreach($ids AS $id) {
 
@@ -138,6 +157,7 @@ foreach($ids AS $id) {
       }
     }
 
+    file_put_contents($json->_id . ".json", json_encode($json));
     $couch->send("PUT", "/$db/$json->_id", json_encode($json));
     echo "done\n";
     // exit();
