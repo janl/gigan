@@ -1,6 +1,8 @@
 <?php
 // Note: this code is ugly. it scrapes JIRA's XML, it must be ugly.
 
+date_default_timezone_set("Europe/Berlin");
+
 // customise here
 
 $xml_file_name = "couchdb.xml";
@@ -157,7 +159,7 @@ foreach($ids AS $id) {
       }
     }
 
-    file_put_contents($json->_id . ".json", json_encode($json));
+    // file_put_contents($json->_id . ".json", json_encode($json));
     $couch->send("PUT", "/$db/$json->_id", json_encode($json));
     echo "done\n";
     // exit();
