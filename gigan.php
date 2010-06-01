@@ -44,7 +44,7 @@ if(!isset($_ENV["GIGAN_BOOT"])) {
 
   // read the JIRA RSS feed until it finds a date that is < that timestamp
   echo "getting the rss feed ...";
-  $rss = file_get_contents("http://issues.apache.org/jira/sr/jira.issueviews:searchrequest-rss/temp/SearchRequest.xml?pid=12310780&sorter/field=issuekey&sorter/order=DESC&tempMax=50");
+  $rss = file_get_contents("https://issues.apache.org/jira/sr/jira.issueviews:searchrequest-rss/temp/SearchRequest.xml?pid=12310780&sorter/field=updated&sorter/order=DESC&tempMax=50");
   echo "done\n";
 
   $xml = simplexml_load_string($rss, $class_name = "SimpleXMLElement", LIBXML_ERR_NONE);
@@ -60,7 +60,7 @@ if(!isset($_ENV["GIGAN_BOOT"])) {
   }
 
   echo "getting the comments rss feed ...";
-  $rss = file_get_contents("http://issues.apache.org/jira/sr/jira.issueviews:searchrequest-comments-rss/temp/SearchRequest.xml?pid=12310780&sorter/field=issuekey&sorter/order=DESC&tempMax=50");
+  $rss = file_get_contents("https://issues.apache.org/jira/sr/jira.issueviews:searchrequest-comments-rss/temp/SearchRequest.xml?pid=12310780&sorter/field=updated&sorter/order=DESC&tempMax=50");
   echo "done\n";
 
   $xml = simplexml_load_string($rss, $class_name = "SimpleXMLElement", LIBXML_ERR_NONE);
