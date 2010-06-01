@@ -10,11 +10,18 @@ $db = "gigan";
 
 $couchdb_host = "127.0.0.1";
 $couchdb_port = 5984;
+$couchdb_user = "";
+$couchdb_pass = "";
 
 $jira_attachment_url = "http://issues.apache.org/jira/secure/attachment/";
 
 // stop customising
-$couch = new CouchSimple(array("host" => $couchdb_host, "port" => $couchdb_port));
+$couch = new CouchSimple(array(
+  "host" => $couchdb_host,
+  "port" => $couchdb_port,
+  "user" => $couchdb_user,
+  "pass" => $couchdb_pass
+));
 
 $ids = array();
 
@@ -160,7 +167,7 @@ foreach($ids AS $id) {
     }
 
     // file_put_contents($json->_id . ".json", json_encode($json));
-    $couch->send("PUT", "/$db/$json->_id", json_encode($json));
+    $result = $couch->send("PUT", "/$db/$json->_id", json_encode($json));
     echo "done\n";
     // exit();
   }
@@ -176,13 +183,17 @@ class CouchSimple {
   } 
 
  function send($method, $url, $post_data = NULL) {
-    $s = fsockopen($this->host, $this->port, $errno, $errstr); 
+    $s = fsockopen(gethostbyname($this->host), $this->port, $errno, $errstr);
     if(!$s) {
        echo "$errno: $errstr\n"; 
        return false;
     } 
 
-    $request = "$method $url HTTP/1.0\r\nHost: localhost\r\n"; 
+    $request = "$method $url HTTP/1.0\r\nHost: $this->host\r\n";
+
+    if($this->user) {
+      $request .= "Authorization: Basic " . base64_encode($this->user . ":" . $this->pass) . "\r\n";
+    }
 
     if($post_data) {
        $request .= "Content-Length: ".strlen($post_data)."\r\n\r\n"; 
