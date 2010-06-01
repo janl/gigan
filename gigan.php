@@ -36,10 +36,10 @@ if(!isset($_ENV["GIGAN_BOOT"])) {
   echo "debug: latest update: $latest_update\n";
 
   echo "debug: getting latest comment update\n";
-  $latest_update_result = $couch->send("GET", "/$db/_design/gigan/_view/latest-comment-update?descending=true&limit=1");
-  $latest_update_result = json_decode($latest_update_result);
-  $latest_update = $latest_update_result->rows[0]->key;
-  echo "debug: latest comment update: $latest_update\n";
+  $latest_comment_update_result = $couch->send("GET", "/$db/_design/gigan/_view/latest-comment-update?descending=true&limit=1");
+  $latest_comment_update_result = json_decode($latest_comment_update_result);
+  $latest_comment_update = $latest_comment_update_result->rows[0]->key;
+  echo "debug: latest comment update: $latest_comment_update\n";
 
 
   // read the JIRA RSS feed until it finds a date that is < that timestamp
@@ -50,8 +50,8 @@ if(!isset($_ENV["GIGAN_BOOT"])) {
   $xml = simplexml_load_string($rss, $class_name = "SimpleXMLElement", LIBXML_ERR_NONE);
   foreach($xml->channel->item AS $bug) {
     $date = strtotime((string)$bug->pubDate) . "000";
-    echo "comparing $date with $latest_update\n";
-    if($date <= $latest_update) {
+    echo "comparing $date \nwith      $latest_update\n";
+    if((int)$date <= (int)$latest_update) {
       break;
     }
     $link = (string)$bug->link;
@@ -66,8 +66,8 @@ if(!isset($_ENV["GIGAN_BOOT"])) {
   $xml = simplexml_load_string($rss, $class_name = "SimpleXMLElement", LIBXML_ERR_NONE);
   foreach($xml->channel->item AS $comment) {
     $date = strtotime((string)$comment->pubDate) . "000";
-    echo "comparing $date with $latest_update\n";
-    if($date <= $latest_comment_update) {
+    echo "comparing $date \nwith      $latest_update\n";
+    if((int)$date <= (int)$latest_comment_update) {
       break;
     }
     $link = (string)$comment->link;
