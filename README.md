@@ -14,9 +14,9 @@ First run:
 
 Customise the top of gigan.php. Then run:
 
-    $ GIGAN_BOOT=true php gigan.php
+    $ GIGAN_BOOT=true php lib/gigan.php
 
-After that, create a cronjob running `php gigan.php` every X minutes (I default
+After that, create a cronjob running `php lib/gigan.php` every X minutes (I default
 to 15) to fetch the latest changes from JIRA.
 
 If you don't feel like running that cronjob, get in touch, I'm happy to host
@@ -30,7 +30,7 @@ lets you browse your issues by a few predefined filters as well as allows you
 to create your own filters.
 
 1. Install CouchApp. Usually, that is just a `sudo easy_install -U couchapp`
-2. `$ cd gigan`
+2. `$ cd gigan/gigan-view`
 3. `$ couchapp push . gigan`
 4. Go to <http://127.0.0.1:5984/gigan/_design/gigan/_list/filters/filters>
 
@@ -38,7 +38,7 @@ to create your own filters.
 
 Create a new filter by creating a new view.
 
-    $ cd gigan/views
+    $ cd gigan/gigan-view/views
     $ mkdir by-type
     $ mate by-type/map.js
     function(doc) {
@@ -63,7 +63,8 @@ Your new filter should show up on
 
 ## Name
 
-Gigan is Godzilla's archenemy. Jira is the Japanese name for Godzilla. Fuck JIRA.
+Gigan is Godzilla's archenemy. Jira is the Japanese name for Godzilla. 
+Fuck JIRA.
 
-“Gigan was the first monster to cause Godzilla to visibly bleed.” — http://en.wikipedia.org/wiki/Gigan
-
+“Gigan was the first monster to cause Godzilla to visibly bleed.” 
+  — http://en.wikipedia.org/wiki/Gigan
