@@ -25,7 +25,7 @@ your JIRA's importer publicly.
 
 ## Browsing Issues
 
-Gigan comes with a little [CouchApp][http://github.com/couchapp/couchapp] that
+Gigan comes with a little [CouchApp](http://github.com/couchapp/couchapp) that
 lets you browse your issues by a few predefined filters as well as allows you
 to create your own filters.
 
